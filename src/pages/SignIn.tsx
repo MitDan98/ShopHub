@@ -18,6 +18,7 @@ const SignIn = () => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
+        console.log("User already logged in, redirecting to home");
         navigate("/");
       }
     };
@@ -25,6 +26,7 @@ const SignIn = () => {
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", event, session ? "Session exists" : "No session");
       if (session) {
         navigate("/");
       }
@@ -37,18 +39,18 @@ const SignIn = () => {
     e.preventDefault();
     setIsLoading(true);
     
-    console.log("Sign in attempt with email:", email);
+    console.log("Attempting sign in with email:", email);
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password,
       });
 
       if (error) {
         console.error("Sign in error:", error);
         
-        // Provide specific error messages based on the error type
+        // Provide user-friendly error messages
         if (error.message.includes("Email not confirmed")) {
           toast({
             variant: "destructive",
@@ -59,13 +61,13 @@ const SignIn = () => {
           toast({
             variant: "destructive",
             title: "Invalid credentials",
-            description: "Please check your email and password and try again.",
+            description: "The email or password you entered is incorrect. Please try again.",
           });
         } else {
           toast({
             variant: "destructive",
             title: "Sign in failed",
-            description: error.message,
+            description: "Please check your credentials and try again.",
           });
         }
         return;
@@ -83,7 +85,7 @@ const SignIn = () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "An unexpected error occurred during sign in.",
+        description: "An unexpected error occurred. Please try again.",
       });
     } finally {
       setIsLoading(false);
