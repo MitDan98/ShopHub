@@ -1,8 +1,5 @@
-import { useEffect, useState } from "react";
-import { Card } from "@/components/ui/card";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UserRound, Settings, LogOut, Edit, Mail, Phone } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -10,14 +7,9 @@ import { useNavigate } from "react-router-dom";
 export const UserProfile = ({ session }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('profile');
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (session?.user?.id) {
-      getProfile(session.user.id);
-    }
-  }, [session]);
 
   const getProfile = async (userId) => {
     try {
@@ -55,78 +47,96 @@ export const UserProfile = ({ session }) => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
+      <div className="flex justify-center items-center min-h-screen">
         <div className="animate-pulse">Loading profile...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="container max-w-4xl mx-auto px-4">
-        <Card className="p-8 bg-white shadow-lg rounded-lg">
-          <div className="flex flex-col md:flex-row gap-8">
-            <div className="flex flex-col items-center space-y-4">
-              <Avatar className="h-32 w-32 border-4 border-primary/20">
-                <AvatarImage src={profile?.avatar_url} />
-                <AvatarFallback className="bg-primary/10 text-2xl">
-                  {profile?.full_name ? profile.full_name[0].toUpperCase() : <UserRound className="h-12 w-12" />}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  <Edit className="h-4 w-4" />
-                  Edit Profile
-                </Button>
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
-                  Settings
-                </Button>
+    <div className="max-w-3xl mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-6">My Account</h1>
+      
+      {/* Tab Navigation */}
+      <div className="flex gap-4 mb-6 border-b">
+        <button
+          className={`pb-2 px-4 ${activeTab === 'profile' ? 'border-b-2 border-primary font-medium' : 'text-gray-500'}`}
+          onClick={() => setActiveTab('profile')}
+        >
+          Profile
+        </button>
+        <button
+          className={`pb-2 px-4 ${activeTab === 'orders' ? 'border-b-2 border-primary font-medium' : 'text-gray-500'}`}
+          onClick={() => setActiveTab('orders')}
+        >
+          Orders
+        </button>
+        <button
+          className={`pb-2 px-4 ${activeTab === 'settings' ? 'border-b-2 border-primary font-medium' : 'text-gray-500'}`}
+          onClick={() => setActiveTab('settings')}
+        >
+          Settings
+        </button>
+      </div>
+
+      {/* Profile Information */}
+      {activeTab === 'profile' && (
+        <div className="bg-white rounded-lg p-6 shadow-sm">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-semibold">Profile Information</h2>
+            <Button variant="outline" size="sm">
+              Edit Profile
+            </Button>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Full Name
+              </label>
+              <div className="text-gray-900 bg-gray-50 p-2 rounded">
+                {profile?.full_name || 'Not set'}
               </div>
             </div>
-            
-            <div className="flex-1 space-y-6">
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900">
-                  {profile?.full_name || 'Anonymous User'}
-                </h2>
-                <p className="text-gray-500 mt-1">
-                  {profile?.username ? `@${profile.username}` : 'No username set'}
-                </p>
-              </div>
 
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 text-gray-600">
-                  <Mail className="h-5 w-5" />
-                  <span>{profile?.email || 'No email set'}</span>
-                </div>
-                <div className="flex items-center gap-3 text-gray-600">
-                  <Phone className="h-5 w-5" />
-                  <span>{profile?.phone || 'No phone number set'}</span>
-                </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email
+              </label>
+              <div className="text-gray-900 bg-gray-50 p-2 rounded">
+                {profile?.email || 'Not set'}
               </div>
+            </div>
 
-              <div className="pt-6 flex flex-col sm:flex-row gap-4">
-                <Button 
-                  variant="default" 
-                  className="w-full sm:w-auto"
-                  onClick={() => navigate('/products')}
-                >
-                  View Products
-                </Button>
-                <Button 
-                  variant="destructive"
-                  className="w-full sm:w-auto flex items-center gap-2"
-                  onClick={handleLogout}
-                >
-                  <LogOut className="h-4 w-4" />
-                  Logout
-                </Button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Phone Number
+              </label>
+              <div className="text-gray-900 bg-gray-50 p-2 rounded">
+                {profile?.phone || 'Not set'}
               </div>
             </div>
           </div>
-        </Card>
-      </div>
+        </div>
+      )}
+
+      {/* Orders Tab Content */}
+      {activeTab === 'orders' && (
+        <div className="bg-white rounded-lg p-6 shadow-sm">
+          <h2 className="text-xl font-semibold mb-4">Orders</h2>
+          <p className="text-gray-500">No orders yet.</p>
+        </div>
+      )}
+
+      {/* Settings Tab Content */}
+      {activeTab === 'settings' && (
+        <div className="bg-white rounded-lg p-6 shadow-sm">
+          <h2 className="text-xl font-semibold mb-4">Settings</h2>
+          <Button variant="destructive" onClick={handleLogout}>
+            Logout
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
