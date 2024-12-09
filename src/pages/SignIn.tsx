@@ -10,6 +10,7 @@ const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -92,6 +93,50 @@ const SignIn = () => {
     }
   };
 
+  const handleResetPassword = async () => {
+    if (!email.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Email required",
+        description: "Please enter your email address to reset your password.",
+      });
+      return;
+    }
+
+    setIsResettingPassword(true);
+    console.log("Attempting to send password reset email to:", email);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) {
+        console.error("Password reset error:", error);
+        toast({
+          variant: "destructive",
+          title: "Reset password failed",
+          description: error.message,
+        });
+        return;
+      }
+
+      toast({
+        title: "Check your email",
+        description: "We've sent you a password reset link. Please check your email.",
+      });
+    } catch (error) {
+      console.error("Unexpected error during password reset:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+      });
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -129,19 +174,28 @@ const SignIn = () => {
               {isLoading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
-          <p className="mt-4 text-center text-sm text-gray-600">
-            Don't have an account?{" "}
+          
+          <div className="mt-4 flex flex-col space-y-4">
             <Button
               variant="link"
-              className="p-0 h-auto font-semibold"
-              onClick={() => navigate("/register")}
+              className="text-sm text-blue-600 hover:text-blue-800"
+              onClick={handleResetPassword}
+              disabled={isResettingPassword}
             >
-              Register
+              {isResettingPassword ? "Sending reset link..." : "Forgot Password?"}
             </Button>
-          </p>
-          <p className="mt-2 text-center text-sm text-gray-500">
-            Make sure to verify your email before signing in
-          </p>
+            
+            <p className="text-center text-sm text-gray-600">
+              Don't have an account?{" "}
+              <Button
+                variant="link"
+                className="p-0 h-auto font-semibold"
+                onClick={() => navigate("/register")}
+              >
+                Register
+              </Button>
+            </p>
+          </div>
         </div>
       </div>
     </div>
