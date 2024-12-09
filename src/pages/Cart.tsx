@@ -35,11 +35,11 @@ const Cart = () => {
 
       // Create order
       const { data: order, error: orderError } = await supabase
-        .from('orders')
+        .from("orders")
         .insert({
           user_id: session.user.id,
           total_amount: total,
-          status: 'completed'
+          status: "completed"
         })
         .select()
         .single();
@@ -58,7 +58,7 @@ const Cart = () => {
       }));
 
       const { error: itemsError } = await supabase
-        .from('order_items')
+        .from("order_items")
         .insert(orderItems);
 
       if (itemsError) throw itemsError;
@@ -66,7 +66,7 @@ const Cart = () => {
       console.log("Order items created");
 
       // Send confirmation email
-      const { error: emailError } = await supabase.functions.invoke('send-order-confirmation', {
+      const { error: emailError } = await supabase.functions.invoke("send-order-confirmation", {
         body: {
           to: session.user.email,
           orderDetails: {
@@ -114,7 +114,7 @@ const Cart = () => {
             <p className="text-gray-600">Your cart is empty</p>
             <Button 
               className="mt-4"
-              onClick={() => window.location.href = '/products'}
+              onClick={() => navigate("/products")}
             >
               Continue Shopping
             </Button>
