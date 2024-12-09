@@ -12,6 +12,8 @@ const Cart = () => {
 
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
+  console.log("Cart items:", cartItems); // Debug log to track cart items
+
   const handleCheckout = () => {
     setIsCheckingOut(true);
     setTimeout(() => {
@@ -32,6 +34,12 @@ const Cart = () => {
           <h1 className="text-2xl font-bold mb-4">Your Cart</h1>
           <div className="bg-white rounded-lg shadow-md p-6 text-center">
             <p className="text-gray-600">Your cart is empty</p>
+            <Button 
+              className="mt-4"
+              onClick={() => window.location.href = '/products'}
+            >
+              Continue Shopping
+            </Button>
           </div>
         </div>
       </div>
