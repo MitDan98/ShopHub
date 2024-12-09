@@ -1,17 +1,33 @@
-import { ShoppingCart, Search, Menu } from "lucide-react";
+import { ShoppingCart, Search, Menu, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useCart } from "@/hooks/useCart";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [session, setSession] = useState(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { cartItems } = useCart();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const cartItemsCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -46,6 +62,14 @@ export const Navbar = () => {
 
   const handleSignIn = () => {
     navigate("/signin");
+  };
+
+  const handleProfileClick = () => {
+    // For now, this just shows a toast. You can add profile page navigation later
+    toast({
+      title: "Profile",
+      description: "Viewing profile settings",
+    });
   };
 
   return (
@@ -83,7 +107,14 @@ export const Navbar = () => {
                 </span>
               )}
             </Button>
-            <Button variant="secondary" onClick={handleSignIn}>Sign In</Button>
+            {session ? (
+              <Button variant="ghost" onClick={handleProfileClick} className="flex items-center gap-2">
+                <UserRound className="h-5 w-5" />
+                Profile
+              </Button>
+            ) : (
+              <Button variant="secondary" onClick={handleSignIn}>Sign In</Button>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -127,9 +158,16 @@ export const Navbar = () => {
                   </span>
                 )}
               </Button>
-              <Button variant="secondary" className="w-full" onClick={handleSignIn}>
-                Sign In
-              </Button>
+              {session ? (
+                <Button variant="ghost" className="justify-start" onClick={handleProfileClick}>
+                  <UserRound className="h-5 w-5 mr-2" />
+                  Profile
+                </Button>
+              ) : (
+                <Button variant="secondary" className="w-full" onClick={handleSignIn}>
+                  Sign In
+                </Button>
+              )}
             </div>
           </div>
         )}
