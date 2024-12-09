@@ -1,5 +1,6 @@
 import { ProductCard } from "./ProductCard";
 import { useToast } from "@/components/ui/use-toast";
+import { useCart } from "@/hooks/useCart";
 
 const FEATURED_PRODUCTS = [
   {
@@ -62,10 +63,18 @@ const FEATURED_PRODUCTS = [
 
 export const FeaturedProducts = () => {
   const { toast } = useToast();
+  const { addToCart } = useCart();
 
   const handleAddToCart = (productId: number) => {
     const product = FEATURED_PRODUCTS.find(p => p.id === productId);
     if (product) {
+      addToCart({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        image: product.image
+      });
+      
       toast({
         title: "Added to Cart",
         description: `${product.title} has been added to your cart.`,
