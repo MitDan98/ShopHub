@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("resend");
-const FROM_EMAIL = "orders@yourdomain.com"; // Replace with your verified domain email
+const FROM_EMAIL = "onboarding@resend.dev"; // Using your provided email
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -50,12 +50,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     const html = `
       <h1>Order Confirmation</h1>
-      <p>Thank you for your order!</p>
-      <h2>Order Details (#${emailRequest.orderDetails.id})</h2>
+      <p>Thank you for your order! Here are your order details:</p>
+      <h2>Order #${emailRequest.orderDetails.id}</h2>
       <ul>
         ${itemsList}
       </ul>
       <p><strong>Total: $${emailRequest.orderDetails.total.toFixed(2)}</strong></p>
+      <p>Random confirmation number: ${Math.random().toString(36).substring(7)}</p>
     `;
 
     console.log("Sending email via Resend API");
