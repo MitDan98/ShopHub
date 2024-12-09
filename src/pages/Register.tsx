@@ -32,15 +32,10 @@ const Register = () => {
     console.log("Starting registration process for:", email);
 
     try {
+      // First sign up the user
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: {
-            username: username,
-          },
-          emailRedirectTo: `${window.location.origin}/signin`,
-        },
       });
 
       if (error) {
@@ -53,16 +48,32 @@ const Register = () => {
         return;
       }
 
+      if (data.user) {
+        // Then update their profile with the username
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ username })
+          .eq('id', data.user.id);
+
+        if (profileError) {
+          console.error("Profile update error:", profileError);
+          toast({
+            variant: "destructive",
+            title: "Profile update failed",
+            description: "Your account was created but we couldn't set your username.",
+          });
+          return;
+        }
+      }
+
       console.log("Registration successful:", data);
       
-      // Show a more detailed success message
       toast({
         title: "Registration successful!",
         description: "Please check your email to verify your account. Once verified, you can sign in.",
         duration: 6000,
       });
       
-      // Redirect to sign in page after successful registration
       navigate("/signin");
     } catch (error) {
       console.error("Unexpected error during registration:", error);
