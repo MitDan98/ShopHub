@@ -23,14 +23,17 @@ interface OrderEmailRequest {
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { to, orderDetails }: OrderEmailRequest = await req.json();
+    console.log("Received request to send order confirmation email");
+    const emailRequest: OrderEmailRequest = await req.json();
+    console.log("Email request data:", emailRequest);
 
-    const itemsList = orderDetails.items
+    const itemsList = emailRequest.orderDetails.items
       .map(
         (item) =>
           `<li>${item.title} x ${item.quantity} - $${(
@@ -42,13 +45,14 @@ const handler = async (req: Request): Promise<Response> => {
     const html = `
       <h1>Order Confirmation</h1>
       <p>Thank you for your order!</p>
-      <h2>Order Details (#${orderDetails.id})</h2>
+      <h2>Order Details (#${emailRequest.orderDetails.id})</h2>
       <ul>
         ${itemsList}
       </ul>
-      <p><strong>Total: $${orderDetails.total.toFixed(2)}</strong></p>
+      <p><strong>Total: $${emailRequest.orderDetails.total.toFixed(2)}</strong></p>
     `;
 
+    console.log("Sending email via Resend API");
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -57,20 +61,29 @@ const handler = async (req: Request): Promise<Response> => {
       },
       body: JSON.stringify({
         from: FROM_EMAIL,
-        to: [to],
-        subject: `Order Confirmation #${orderDetails.id}`,
+        to: [emailRequest.to],
+        subject: `Order Confirmation #${emailRequest.orderDetails.id}`,
         html: html,
       }),
     });
 
-    const data = await res.json();
-    
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (error) {
-    console.error("Error sending email:", error);
+    if (res.ok) {
+      const data = await res.json();
+      console.log("Email sent successfully:", data);
+      return new Response(JSON.stringify(data), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    } else {
+      const error = await res.text();
+      console.error("Error from Resend API:", error);
+      return new Response(JSON.stringify({ error }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+  } catch (error: any) {
+    console.error("Error in send-order-confirmation function:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
