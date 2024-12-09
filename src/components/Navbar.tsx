@@ -4,12 +4,16 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
+import { useCart } from "@/hooks/useCart";
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { cartItems } = useCart();
+
+  const cartItemsCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,10 +41,7 @@ export const Navbar = () => {
   };
 
   const handleCartClick = () => {
-    toast({
-      title: "Cart",
-      description: "Cart functionality coming soon!",
-    });
+    navigate("/cart");
   };
 
   const handleSignIn = () => {
@@ -74,8 +75,13 @@ export const Navbar = () => {
             </form>
             <Button variant="ghost" onClick={handleCategoryClick}>Categories</Button>
             <Button variant="ghost" onClick={handleDealsClick}>Deals</Button>
-            <Button variant="ghost" onClick={handleCartClick}>
+            <Button variant="ghost" onClick={handleCartClick} className="relative">
               <ShoppingCart className="h-5 w-5" />
+              {cartItemsCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {cartItemsCount}
+                </span>
+              )}
             </Button>
             <Button variant="secondary" onClick={handleSignIn}>Sign In</Button>
           </div>
@@ -94,7 +100,7 @@ export const Navbar = () => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden pb-4 animate-fadeIn">
+          <div className="md:hidden pb-4">
             <div className="flex flex-col space-y-4">
               <form onSubmit={handleSearch} className="relative">
                 <Input
@@ -112,9 +118,14 @@ export const Navbar = () => {
               <Button variant="ghost" className="justify-start" onClick={handleDealsClick}>
                 Deals
               </Button>
-              <Button variant="ghost" className="justify-start" onClick={handleCartClick}>
+              <Button variant="ghost" className="justify-start relative" onClick={handleCartClick}>
                 <ShoppingCart className="h-5 w-5 mr-2" />
                 Cart
+                {cartItemsCount > 0 && (
+                  <span className="absolute top-2 left-6 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {cartItemsCount}
+                  </span>
+                )}
               </Button>
               <Button variant="secondary" className="w-full" onClick={handleSignIn}>
                 Sign In
