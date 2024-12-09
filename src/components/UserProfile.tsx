@@ -4,6 +4,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { EditProfileForm } from "./EditProfileForm";
+import { Home } from "lucide-react";
 
 export const UserProfile = ({ session }) => {
   const [profile, setProfile] = useState(null);
@@ -54,6 +55,14 @@ export const UserProfile = ({ session }) => {
     });
   };
 
+  const handleHomeClick = () => {
+    navigate('/');
+    toast({
+      title: "Navigation",
+      description: "Returning to home page",
+    });
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -64,7 +73,17 @@ export const UserProfile = ({ session }) => {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">My Account</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">My Account</h1>
+        <Button
+          variant="outline"
+          onClick={handleHomeClick}
+          className="flex items-center gap-2"
+        >
+          <Home className="h-4 w-4" />
+          Return Home
+        </Button>
+      </div>
       
       {/* Tab Navigation */}
       <div className="flex gap-4 mb-6 border-b">
