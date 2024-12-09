@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const RESEND_API_KEY = Deno.env.get("resend");
 const FROM_EMAIL = "orders@yourdomain.com"; // Replace with your verified domain email
 
 const corsHeaders = {
@@ -30,8 +30,14 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     console.log("Received request to send order confirmation email");
+    console.log("RESEND_API_KEY present:", !!RESEND_API_KEY);
+    
     const emailRequest: OrderEmailRequest = await req.json();
     console.log("Email request data:", emailRequest);
+
+    if (!RESEND_API_KEY) {
+      throw new Error("Missing RESEND_API_KEY environment variable");
+    }
 
     const itemsList = emailRequest.orderDetails.items
       .map(
