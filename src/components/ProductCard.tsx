@@ -2,13 +2,15 @@ import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 
 interface ProductCardProps {
+  id: number;
   title: string;
   price: number;
   image: string;
   category: string;
+  onAddToCart: () => void;
 }
 
-export const ProductCard = ({ title, price, image, category }: ProductCardProps) => {
+export const ProductCard = ({ title, price, image, category, onAddToCart }: ProductCardProps) => {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:-translate-y-1">
       <div className="relative aspect-square overflow-hidden">
@@ -25,7 +27,7 @@ export const ProductCard = ({ title, price, image, category }: ProductCardProps)
         <h3 className="font-semibold text-lg mb-2 line-clamp-2">{title}</h3>
         <div className="flex items-center justify-between">
           <span className="text-2xl font-bold text-primary">${price}</span>
-          <Button size="sm" variant="secondary">
+          <Button size="sm" variant="secondary" onClick={onAddToCart}>
             <ShoppingCart className="h-4 w-4 mr-2" />
             Add to Cart
           </Button>
