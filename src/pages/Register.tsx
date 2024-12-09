@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Navbar } from "@/components/Navbar";
@@ -13,6 +13,17 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate("/");
+      }
+    };
+    checkUser();
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +39,7 @@ const Register = () => {
           data: {
             username: username,
           },
+          emailRedirectTo: `${window.location.origin}/signin`,
         },
       });
 
@@ -42,9 +54,12 @@ const Register = () => {
       }
 
       console.log("Registration successful:", data);
+      
+      // Show a more detailed success message
       toast({
-        title: "Registration successful",
-        description: "Please check your email to verify your account.",
+        title: "Registration successful!",
+        description: "Please check your email to verify your account. Once verified, you can sign in.",
+        duration: 6000,
       });
       
       // Redirect to sign in page after successful registration
