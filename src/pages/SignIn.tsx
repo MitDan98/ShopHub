@@ -40,19 +40,6 @@ const SignIn = () => {
     console.log("Sign in attempt with email:", email);
 
     try {
-      // First, check if the user exists
-      const { data: { users }, error: getUserError } = await supabase.auth.admin.listUsers({
-        filters: {
-          email: email
-        }
-      });
-
-      if (getUserError) {
-        console.error("Error checking user:", getUserError);
-        throw getUserError;
-      }
-
-      // Attempt to sign in
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
