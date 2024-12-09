@@ -65,11 +65,7 @@ export const Navbar = () => {
   };
 
   const handleProfileClick = () => {
-    // For now, this just shows a toast. You can add profile page navigation later
-    toast({
-      title: "Profile",
-      description: "Viewing profile settings",
-    });
+    navigate("/profile");
   };
 
   return (
