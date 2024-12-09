@@ -40,18 +40,47 @@ const SignIn = () => {
     console.log("Sign in attempt with email:", email);
 
     try {
+      // First, check if the user exists
+      const { data: { users }, error: getUserError } = await supabase.auth.admin.listUsers({
+        filters: {
+          email: email
+        }
+      });
+
+      if (getUserError) {
+        console.error("Error checking user:", getUserError);
+        throw getUserError;
+      }
+
+      // Attempt to sign in
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        console.error("Sign in error:", error.message);
-        toast({
-          variant: "destructive",
-          title: "Sign in failed",
-          description: error.message,
-        });
+        console.error("Sign in error:", error);
+        
+        // Provide specific error messages based on the error type
+        if (error.message.includes("Email not confirmed")) {
+          toast({
+            variant: "destructive",
+            title: "Email not verified",
+            description: "Please check your email and verify your account before signing in.",
+          });
+        } else if (error.message.includes("Invalid login credentials")) {
+          toast({
+            variant: "destructive",
+            title: "Invalid credentials",
+            description: "Please check your email and password and try again.",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Sign in failed",
+            description: error.message,
+          });
+        }
         return;
       }
 
@@ -120,6 +149,9 @@ const SignIn = () => {
             >
               Register
             </Button>
+          </p>
+          <p className="mt-2 text-center text-sm text-gray-500">
+            Make sure to verify your email before signing in
           </p>
         </div>
       </div>
