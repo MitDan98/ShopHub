@@ -3,11 +3,13 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { EditProfileForm } from "./EditProfileForm";
 
 export const UserProfile = ({ session }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('profile');
+  const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -91,39 +93,53 @@ export const UserProfile = ({ session }) => {
         <div className="bg-white rounded-lg p-6 shadow-sm">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold">Profile Information</h2>
-            <Button variant="outline" size="sm">
-              Edit Profile
-            </Button>
+            {!isEditing && (
+              <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                Edit Profile
+              </Button>
+            )}
           </div>
 
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Full Name
-              </label>
-              <div className="text-gray-900 bg-gray-50 p-2 rounded">
-                {profile?.full_name || 'Not set'}
+          {isEditing ? (
+            <EditProfileForm 
+              profile={profile}
+              session={session}
+              onSuccess={() => {
+                setIsEditing(false);
+                getProfile();
+              }}
+              onCancel={() => setIsEditing(false)}
+            />
+          ) : (
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Full Name
+                </label>
+                <div className="text-gray-900 bg-gray-50 p-2 rounded">
+                  {profile?.full_name || 'Not set'}
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <div className="text-gray-900 bg-gray-50 p-2 rounded">
-                {profile?.email || session?.user?.email || 'Not set'}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <div className="text-gray-900 bg-gray-50 p-2 rounded">
+                  {profile?.email || session?.user?.email || 'Not set'}
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone Number
-              </label>
-              <div className="text-gray-900 bg-gray-50 p-2 rounded">
-                {profile?.phone || 'Not set'}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Phone Number
+                </label>
+                <div className="text-gray-900 bg-gray-50 p-2 rounded">
+                  {profile?.phone || 'Not set'}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       )}
 
