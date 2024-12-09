@@ -44,10 +44,7 @@ export const Navbar = () => {
   };
 
   const handleSignIn = () => {
-    toast({
-      title: "Sign In",
-      description: "Sign in functionality coming soon!",
-    });
+    navigate("/signin");
   };
 
   return (
