@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,21 +11,22 @@ export const UserProfile = ({ session }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const getProfile = async (userId) => {
+  const getProfile = async () => {
     try {
       setLoading(true);
-      console.log("Fetching profile for user:", userId);
+      console.log("Fetching profile for user:", session?.user?.id);
       
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('id', session?.user?.id)
         .single();
 
       if (error) throw error;
       console.log('Profile data:', data);
       setProfile(data);
     } catch (error) {
+      console.error('Error fetching profile:', error);
       toast({
         variant: "destructive",
         title: "Error fetching profile",
@@ -35,6 +36,12 @@ export const UserProfile = ({ session }) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      getProfile();
+    }
+  }, [session?.user?.id]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -104,7 +111,7 @@ export const UserProfile = ({ session }) => {
                 Email
               </label>
               <div className="text-gray-900 bg-gray-50 p-2 rounded">
-                {profile?.email || 'Not set'}
+                {profile?.email || session?.user?.email || 'Not set'}
               </div>
             </div>
 
