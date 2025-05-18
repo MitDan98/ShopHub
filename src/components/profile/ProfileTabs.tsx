@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Home, Package, User, Settings } from "lucide-react";
 
 interface ProfileTabsProps {
@@ -11,28 +10,38 @@ interface ProfileTabsProps {
 
 export const ProfileTabs = ({ activeTab, setActiveTab, isAdmin }: ProfileTabsProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Handle tab click to prevent refresh loops
+  const handleTabClick = (tab: string) => {
+    // If we're already on the profile page, just switch tabs
+    if (location.pathname === '/profile') {
+      setActiveTab(tab);
+    } else {
+      // Otherwise navigate to profile page with the selected tab
+      navigate('/profile', { state: { activeTab: tab } });
+    }
+  };
 
   return (
     <div className="flex gap-4 mb-6 border-b">
       <button
         className={`pb-2 px-4 flex items-center gap-1 ${activeTab === 'profile' ? 'border-b-2 border-primary font-medium' : 'text-gray-500'}`}
-        onClick={() => setActiveTab('profile')}
+        onClick={() => handleTabClick('profile')}
       >
         <User className="w-4 h-4" />
         Profile
       </button>
       <button
         className={`pb-2 px-4 flex items-center gap-1 ${activeTab === 'orders' ? 'border-b-2 border-primary font-medium' : 'text-gray-500'}`}
-        onClick={() => {
-          navigate('/orders');
-        }}
+        onClick={() => navigate('/orders')}
       >
         <Package className="w-4 h-4" />
         Orders
       </button>
       <button
         className={`pb-2 px-4 flex items-center gap-1 ${activeTab === 'settings' ? 'border-b-2 border-primary font-medium' : 'text-gray-500'}`}
-        onClick={() => setActiveTab('settings')}
+        onClick={() => handleTabClick('settings')}
       >
         <Settings className="w-4 h-4" />
         Settings

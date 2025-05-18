@@ -15,17 +15,27 @@ import { ProfileSettings } from "./profile/ProfileSettings";
 
 interface UserProfileProps {
   session: Session | null;
+  initialActiveTab?: string;
+  setActiveTab?: (tab: string) => void;
 }
 
 const ADMIN_EMAIL = "danmititi@gmail.com";
 
-export const UserProfile = ({ session }: UserProfileProps) => {
+export const UserProfile = ({ session, initialActiveTab = 'profile', setActiveTab }: UserProfileProps) => {
   const [profile, setProfile] = useState<Partial<Profile> | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTabState, setActiveTabState] = useState(initialActiveTab);
   const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Use either the provided setActiveTab function or the local state setter
+  const handleSetActiveTab = (tab: string) => {
+    if (setActiveTab) {
+      setActiveTab(tab);
+    }
+    setActiveTabState(tab);
+  };
 
   const getProfile = async () => {
     try {
@@ -59,6 +69,11 @@ export const UserProfile = ({ session }: UserProfileProps) => {
     }
   }, [session?.user?.id]);
 
+  // Update internal activeTab when initialActiveTab changes
+  useEffect(() => {
+    setActiveTabState(initialActiveTab);
+  }, [initialActiveTab]);
+
   // Check if current user is the admin
   const isAdmin = session?.user?.email === ADMIN_EMAIL;
 
@@ -87,6 +102,9 @@ export const UserProfile = ({ session }: UserProfileProps) => {
     );
   }
 
+  // For debugging
+  console.log("Rendering UserProfile with activeTab:", activeTabState);
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
@@ -102,10 +120,14 @@ export const UserProfile = ({ session }: UserProfileProps) => {
       </div>
       
       {/* Tab Navigation */}
-      <ProfileTabs activeTab={activeTab} setActiveTab={setActiveTab} isAdmin={isAdmin} />
+      <ProfileTabs 
+        activeTab={activeTabState} 
+        setActiveTab={handleSetActiveTab} 
+        isAdmin={isAdmin} 
+      />
 
       {/* Profile Information */}
-      {activeTab === 'profile' && (
+      {activeTabState === 'profile' && (
         isEditing ? (
           <EditProfileForm 
             profile={profile}
@@ -122,7 +144,7 @@ export const UserProfile = ({ session }: UserProfileProps) => {
       )}
 
       {/* Settings Tab Content */}
-      {activeTab === 'settings' && (
+      {activeTabState === 'settings' && (
         <ProfileSettings onLogout={handleLogout} />
       )}
     </div>
