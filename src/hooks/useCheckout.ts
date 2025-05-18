@@ -55,8 +55,11 @@ export const useCheckout = () => {
       let order: Order | null = null;
       
       if (Array.isArray(orderData)) {
-        order = orderData.length > 0 ? orderData[0] : null;
+        // Explicitly type the orderData as Order[] for the array case
+        const orderArray = orderData as Order[];
+        order = orderArray.length > 0 ? orderArray[0] : null;
       } else {
+        // It's a single object
         order = orderData as Order;
       }
         
