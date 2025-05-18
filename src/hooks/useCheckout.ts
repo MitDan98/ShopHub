@@ -87,7 +87,8 @@ export const useCheckout = () => {
 
       console.log("Order items created");
 
-      // Send confirmation email
+      // Send confirmation email to the customer
+      console.log("Sending order confirmation email to:", session.user.email);
       const { error: emailError } = await supabase.functions.invoke("send-order-confirmation", {
         body: {
           to: session.user.email,
@@ -106,13 +107,19 @@ export const useCheckout = () => {
       if (emailError) {
         console.error("Error sending email:", emailError);
         // Don't throw error here, as the order was still successful
+        toast({
+          title: "Order placed successfully!",
+          description: "Your order has been placed, but there was an issue sending the confirmation email.",
+        });
+      } else {
+        console.log("Order confirmation email sent successfully");
+        toast({
+          title: "Order placed successfully!",
+          description: "You will receive a confirmation email shortly.",
+        });
       }
 
       clearCart();
-      toast({
-        title: "Order placed successfully!",
-        description: "You will receive a confirmation email shortly.",
-      });
       navigate("/profile", { state: { activeTab: "orders" }, replace: true });
     } catch (error: any) {
       console.error("Error processing order:", error);
