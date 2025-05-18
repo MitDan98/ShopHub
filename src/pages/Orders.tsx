@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,6 +38,7 @@ const Orders = () => {
       if (!session) {
         navigate('/signin');
       } else {
+        console.log("Fetching orders for user:", session.user.id);
         fetchOrders(session.user.id);
       }
     });
@@ -57,10 +59,16 @@ const Orders = () => {
       setLoading(true);
       
       // Fetch all orders for this user
+      console.log("Fetching orders for user ID:", userId);
       const { data: ordersData, error: ordersError } = await ordersTable.getByUserId(userId);
       
-      if (ordersError) throw ordersError;
+      if (ordersError) {
+        console.error("Error fetching orders:", ordersError);
+        throw ordersError;
+      }
+      
       if (ordersData) {
+        console.log("Orders data:", ordersData);
         setOrders(ordersData);
         
         // Fetch items for each order
@@ -70,6 +78,8 @@ const Orders = () => {
         // Fetch tracking history for each order
         const trackingPromises = ordersData.map(order => fetchOrderTracking(order.id));
         await Promise.all(trackingPromises);
+      } else {
+        console.log("No orders found for user:", userId);
       }
     } catch (error: any) {
       console.error('Error fetching orders:', error);
@@ -85,9 +95,11 @@ const Orders = () => {
 
   const fetchOrderItems = async (orderId: string) => {
     try {
+      console.log("Fetching items for order:", orderId);
       const { data, error } = await orderItemsTable.getByOrderId(orderId);
       if (error) throw error;
       if (data) {
+        console.log(`Items for order ${orderId}:`, data);
         setOrderItems(prev => ({
           ...prev,
           [orderId]: data
@@ -100,9 +112,11 @@ const Orders = () => {
 
   const fetchOrderTracking = async (orderId: string) => {
     try {
+      console.log("Fetching tracking for order:", orderId);
       const { data, error } = await orderTrackingTable.getByOrderId(orderId);
       if (error) throw error;
       if (data) {
+        console.log(`Tracking for order ${orderId}:`, data);
         setOrderTracking(prev => ({
           ...prev,
           [orderId]: data
@@ -171,8 +185,8 @@ const Orders = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm">Status:</span>
-                    <Badge className={getStatusColor(order.status)}>
-                      {order.status}
+                    <Badge className={getStatusColor(order.status || 'pending')}>
+                      {order.status || 'pending'}
                     </Badge>
                   </div>
                 </div>
@@ -202,10 +216,10 @@ const Orders = () => {
                             ))}
                           </TableBody>
                           <tfoot className="border-t bg-muted/50 font-medium">
-                            <TableRow>
-                              <TableCell colSpan={2}>Total</TableCell>
-                              <TableCell className="text-right">${order.total_amount.toFixed(2)}</TableCell>
-                            </TableRow>
+                            <tr>
+                              <td colSpan={2} className="p-2 pl-4">Total</td>
+                              <td className="p-2 pr-4 text-right">${order.total_amount.toFixed(2)}</td>
+                            </tr>
                           </tfoot>
                         </Table>
                       </AccordionContent>

@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
@@ -68,7 +69,7 @@ const SignIn = () => {
           toast({
             variant: "destructive",
             title: "Sign in failed",
-            description: "Please check your credentials and try again.",
+            description: error.message || "Please check your credentials and try again.",
           });
         }
         return;
@@ -80,7 +81,13 @@ const SignIn = () => {
         description: "You have successfully signed in.",
       });
       
-      navigate("/");
+      // Check if user is admin to redirect to admin dashboard
+      if (email === "danmititi@gmail.com") {
+        console.log("Admin user detected, redirecting to admin dashboard");
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
     } catch (error) {
       console.error("Unexpected error during sign in:", error);
       toast({

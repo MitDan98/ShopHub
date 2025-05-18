@@ -58,6 +58,9 @@ const AdminDashboard = () => {
         return;
       }
       
+      console.log("Current user email:", session.user.email);
+      console.log("Admin email check:", session.user.email === ADMIN_EMAIL);
+      
       // Check if user email is the admin email
       if (session.user.email !== ADMIN_EMAIL) {
         toast({
@@ -93,13 +96,17 @@ const AdminDashboard = () => {
 
   const checkAndSetupAdminRole = async (userId: string, email: string) => {
     try {
+      console.log("Checking admin role for user:", userId, "with email:", email);
       const { data, error } = await profilesTable.getById(userId);
       
       if (error) throw error;
       
+      console.log("Profile data:", data);
+      
       if (data) {
         // If user is admin email but doesn't have admin role, update it
         if (email === ADMIN_EMAIL && data.role !== 'admin') {
+          console.log("Setting admin role for user:", userId);
           const { error: updateError } = await profilesTable.update({
             id: userId,
             role: 'admin'
@@ -112,8 +119,8 @@ const AdminDashboard = () => {
         
         setProfile(data);
         
-        // Only proceed with admin dashboard if user has admin role
-        if (data.role === 'admin') {
+        // Fetch orders regardless of role if the email matches admin email
+        if (email === ADMIN_EMAIL) {
           fetchAllOrders();
         } else {
           toast({
