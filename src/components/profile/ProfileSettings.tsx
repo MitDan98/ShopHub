@@ -31,7 +31,8 @@ export const ProfileSettings = ({ onLogout }: ProfileSettingsProps) => {
         return;
       }
       
-      console.log("Logging out user with session ID:", session.id);
+      // Log user ID instead of session ID (which doesn't exist)
+      console.log("Logging out user with ID:", session.user.id);
       
       // Perform the logout
       const { error } = await supabase.auth.signOut();
