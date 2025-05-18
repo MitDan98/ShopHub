@@ -19,8 +19,14 @@ export const ProfileTabs = ({ activeTab, setActiveTab, isAdmin }: ProfileTabsPro
       setActiveTab(tab);
     } else {
       // Otherwise navigate to profile page with the selected tab
-      navigate('/profile', { state: { activeTab: tab } });
+      navigate('/profile', { state: { activeTab: tab }, replace: true });
     }
+  };
+
+  // Handle admin navigation separately to avoid refresh loops
+  const handleAdminClick = () => {
+    // Use replace: true to avoid adding to history stack
+    navigate('/admin', { replace: true });
   };
 
   return (
@@ -34,7 +40,7 @@ export const ProfileTabs = ({ activeTab, setActiveTab, isAdmin }: ProfileTabsPro
       </button>
       <button
         className={`pb-2 px-4 flex items-center gap-1 ${activeTab === 'orders' ? 'border-b-2 border-primary font-medium' : 'text-gray-500'}`}
-        onClick={() => navigate('/orders')}
+        onClick={() => navigate('/orders', { replace: true })}
       >
         <Package className="w-4 h-4" />
         Orders
@@ -51,7 +57,7 @@ export const ProfileTabs = ({ activeTab, setActiveTab, isAdmin }: ProfileTabsPro
       {isAdmin && (
         <button
           className="ml-auto pb-2 px-4 text-blue-600 hover:text-blue-800 font-medium"
-          onClick={() => navigate('/admin')}
+          onClick={handleAdminClick}
         >
           Admin Dashboard
         </button>

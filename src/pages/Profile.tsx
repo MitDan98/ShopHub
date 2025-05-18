@@ -20,7 +20,7 @@ const Profile = () => {
     // Check if user is authenticated
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
-        navigate('/signin');
+        navigate('/signin', { replace: true });
       } else {
         setSession(session);
       }
@@ -30,7 +30,7 @@ const Profile = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
-        navigate('/signin');
+        navigate('/signin', { replace: true });
       } else {
         setSession(session);
       }
