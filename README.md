@@ -1,9 +1,18 @@
+
 # Welcome to your Dan Mititi Project
 
 ## Project info
 
 ## Is just for my university 
 
+## Database Setup
+
+To set up the database for this project:
+
+1. Navigate to the SQL Editor in your Supabase project
+2. Copy the SQL from `supabase/migrations/create_profiles_table.sql`
+3. Paste it into the SQL Editor and run it
+4. This will create all necessary tables and set up authentication
 
 ## How can I edit this code?
 
@@ -49,6 +58,5 @@ This project is built with .
 - React
 - shadcn-ui
 - Tailwind CSS
-
-
+- Supabase for authentication and database
 
