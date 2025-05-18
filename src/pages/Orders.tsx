@@ -202,12 +202,12 @@ const Orders = () => {
                               </TableRow>
                             ))}
                           </TableBody>
-                          <TableFooter>
+                          <tfoot className="border-t bg-muted/50 font-medium">
                             <TableRow>
                               <TableCell colSpan={2}>Total</TableCell>
                               <TableCell className="text-right">${order.total_amount.toFixed(2)}</TableCell>
                             </TableRow>
-                          </TableFooter>
+                          </tfoot>
                         </Table>
                       </AccordionContent>
                     </AccordionItem>
