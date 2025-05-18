@@ -6,9 +6,8 @@ import { useCart } from "@/hooks/useCart";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { ordersTable, orderItemsTable } from "@/integrations/supabase/customClient";
-import { useNavigate } from "react-router-dom";
 import { Order } from "@/types/database.types";
+import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
   const { cartItems, updateQuantity, removeFromCart, clearCart } = useCart();
@@ -36,11 +35,10 @@ const Cart = () => {
 
       console.log("Creating order for user:", session.user.id);
 
-      // Create order directly with Supabase client to bypass RLS issues
+      // Create order - the trigger will automatically set user_id
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert({
-          user_id: session.user.id,
           total_amount: total,
           status: "completed"
         })
