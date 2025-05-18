@@ -45,11 +45,16 @@ export const useCheckout = () => {
         throw orderError;
       }
       
-      if (!orderData || orderData.length === 0) {
-        throw new Error("Failed to create order");
+      // Check if orderData exists and has data
+      if (!orderData) {
+        throw new Error("Failed to create order - no data returned");
       }
-
-      const order = orderData[0] as Order;
+      
+      // Explicitly type and access the first order
+      const order = Array.isArray(orderData) && orderData.length > 0 
+        ? orderData[0] as Order 
+        : orderData as Order;
+        
       console.log("Order created:", order);
 
       // Create order items using the orderItemsTable helper
