@@ -2,8 +2,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("resend");
-const FROM_EMAIL = "onboarding@resend.dev";
-const TEST_EMAIL = "danmititi@gmail.com"; // For development testing
+const FROM_EMAIL = "shophub@24digital.dev"; // Updated sender email
+const TEST_EMAIL = "shophub@24digital.dev"; // Updated test recipient email
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -143,7 +143,7 @@ const handler = async (req: Request): Promise<Response> => {
       },
       body: JSON.stringify({
         from: FROM_EMAIL,
-        to: [TEST_EMAIL], // Always send to test email during development
+        to: [emailRequest.to], // Send to actual customer email instead of test email
         subject: `Order Confirmation #${emailRequest.orderDetails.id}`,
         html: html,
       }),
