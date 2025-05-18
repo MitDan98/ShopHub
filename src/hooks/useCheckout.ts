@@ -36,8 +36,8 @@ export const useCheckout = () => {
       // Create order using the ordersTable helper from customClient
       const { data: orderData, error: orderError } = await ordersTable.insert({
         total_amount: total,
-        status: "completed"
-        // user_id is set automatically by the trigger we created
+        status: "completed",
+        user_id: session.user.id // Explicitly set user_id to ensure it's properly assigned
       });
 
       if (orderError) {
@@ -45,26 +45,20 @@ export const useCheckout = () => {
         throw orderError;
       }
       
+      console.log("Order data received:", orderData);
+      
       // Check if orderData exists and has data
-      if (!orderData) {
+      if (!orderData || (Array.isArray(orderData) && orderData.length === 0)) {
         throw new Error("Failed to create order - no data returned");
       }
       
       // Handle different response formats from Supabase
-      // It can return either an array or a single object
-      let order: Order | null = null;
+      let order: Order;
       
       if (Array.isArray(orderData)) {
-        // Explicitly type the orderData as Order[] for the array case
-        const orderArray = orderData as Order[];
-        order = orderArray.length > 0 ? orderArray[0] : null;
+        order = orderData[0];
       } else {
-        // It's a single object
         order = orderData as Order;
-      }
-        
-      if (!order) {
-        throw new Error("Could not process order data");
       }
         
       console.log("Order created:", order);
