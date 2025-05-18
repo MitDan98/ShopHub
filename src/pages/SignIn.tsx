@@ -20,8 +20,15 @@ const SignIn = () => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        console.log("User already logged in, redirecting to home");
-        navigate("/");
+        console.log("User already logged in:", session.user.email);
+        
+        // Check if user is admin and redirect accordingly
+        if (session.user.email === "danmititi@gmail.com") {
+          console.log("Admin user detected, redirecting to admin dashboard");
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
       }
     };
     checkUser();
@@ -30,7 +37,12 @@ const SignIn = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth state changed:", event, session ? "Session exists" : "No session");
       if (session) {
-        navigate("/");
+        if (session.user.email === "danmititi@gmail.com") {
+          console.log("Admin user detected, redirecting to admin dashboard");
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
       }
     });
 
@@ -186,7 +198,34 @@ const SignIn = () => {
             <Button
               variant="link"
               className="text-sm text-blue-600 hover:text-blue-800"
-              onClick={handleResetPassword}
+              onClick={() => {
+                if (email.trim()) {
+                  setIsResettingPassword(true);
+                  supabase.auth.resetPasswordForEmail(email.trim(), {
+                    redirectTo: `${window.location.origin}/reset-password`,
+                  }).then(({ error }) => {
+                    setIsResettingPassword(false);
+                    if (error) {
+                      toast({
+                        variant: "destructive",
+                        title: "Reset password failed",
+                        description: error.message,
+                      });
+                    } else {
+                      toast({
+                        title: "Check your email",
+                        description: "We've sent you a password reset link. Please check your email.",
+                      });
+                    }
+                  });
+                } else {
+                  toast({
+                    variant: "destructive",
+                    title: "Email required",
+                    description: "Please enter your email address to reset your password.",
+                  });
+                }
+              }}
               disabled={isResettingPassword}
             >
               {isResettingPassword ? "Sending reset link..." : "Forgot Password?"}

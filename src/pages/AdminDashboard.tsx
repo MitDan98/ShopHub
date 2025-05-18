@@ -9,23 +9,34 @@ import { LoadingState } from "@/components/admin/LoadingState";
 
 const AdminDashboard = () => {
   const [orders, setOrders] = useState<any[]>([]);
-  const { loading, profile } = useAdminAuth();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { loading: authLoading, profile } = useAdminAuth();
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!loading && profile) {
+    if (!authLoading && profile) {
+      console.log("Admin profile loaded:", profile);
       fetchAllOrders();
     }
-  }, [loading, profile]);
+  }, [authLoading, profile]);
 
   const fetchAllOrders = async () => {
     try {
+      console.log("Fetching all orders...");
+      setIsLoading(true);
       const { data, error } = await ordersTable.getAllOrders();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching orders:", error);
+        throw error;
+      }
       
       if (data) {
+        console.log("Orders fetched successfully:", data.length);
         setOrders(data);
+      } else {
+        console.log("No orders found");
+        setOrders([]);
       }
     } catch (error: any) {
       console.error('Error fetching orders:', error);
@@ -34,10 +45,12 @@ const AdminDashboard = () => {
         title: "Error",
         description: error.message || "Could not load orders",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  if (loading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
@@ -55,10 +68,14 @@ const AdminDashboard = () => {
         <h1 className="text-2xl font-bold mb-2">Admin Dashboard</h1>
         <p className="text-gray-500 mb-6">Manage orders and customer data.</p>
         
-        <AdminTabs 
-          orders={orders}
-          onOrdersUpdate={fetchAllOrders}
-        />
+        {isLoading ? (
+          <LoadingState />
+        ) : (
+          <AdminTabs 
+            orders={orders}
+            onOrdersUpdate={fetchAllOrders}
+          />
+        )}
       </div>
     </div>
   );

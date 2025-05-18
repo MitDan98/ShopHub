@@ -22,6 +22,7 @@ export const useAdminAuth = () => {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
+          console.log("No session found, redirecting to signin");
           navigate('/signin');
           return;
         }
@@ -31,6 +32,7 @@ export const useAdminAuth = () => {
         
         // Check if user email is the admin email
         if (session.user.email !== ADMIN_EMAIL) {
+          console.log("User is not admin, redirecting to home");
           toast({
             variant: "destructive",
             title: "Access Denied",
@@ -80,7 +82,10 @@ export const useAdminAuth = () => {
       console.log("Checking admin role for user:", userId, "with email:", email);
       const { data, error } = await profilesTable.getById(userId);
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching profile:", error);
+        throw error;
+      }
       
       console.log("Profile data:", data);
       
@@ -93,12 +98,21 @@ export const useAdminAuth = () => {
             role: 'admin'
           });
           
-          if (updateError) throw updateError;
+          if (updateError) {
+            console.error("Error updating role:", updateError);
+            throw updateError;
+          }
           
           console.log("Admin role set successfully");
+          // Refresh profile data after update
+          const { data: updatedData, error: refreshError } = await profilesTable.getById(userId);
+          if (refreshError) throw refreshError;
+          setProfile(updatedData);
+        } else {
+          setProfile(data);
         }
-        
-        setProfile(data);
+      } else {
+        console.error("No profile found for user:", userId);
       }
     } catch (error: any) {
       console.error('Error checking admin role:', error);
