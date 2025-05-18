@@ -52,9 +52,13 @@ export const useCheckout = () => {
       
       // Handle different response formats from Supabase
       // It can return either an array or a single object
-      const order: Order = Array.isArray(orderData) ? 
-        (orderData.length > 0 ? orderData[0] : null) as Order :
-        orderData as Order;
+      let order: Order | null = null;
+      
+      if (Array.isArray(orderData)) {
+        order = orderData.length > 0 ? orderData[0] : null;
+      } else {
+        order = orderData as Order;
+      }
         
       if (!order) {
         throw new Error("Could not process order data");
