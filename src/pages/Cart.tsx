@@ -36,14 +36,22 @@ const Cart = () => {
 
       console.log("Creating order for user:", session.user.id);
 
-      // Create order
-      const { data: orderData, error: orderError } = await ordersTable.insert({
-        user_id: session.user.id,
-        total_amount: total,
-        status: "completed"
-      }).select().single();
+      // Create order directly with Supabase client to bypass RLS issues
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          user_id: session.user.id,
+          total_amount: total,
+          status: "completed"
+        })
+        .select()
+        .single();
 
-      if (orderError) throw orderError;
+      if (orderError) {
+        console.error("Order creation error:", orderError);
+        throw orderError;
+      }
+      
       if (!orderData) throw new Error("Failed to create order");
 
       const order = orderData as Order;
@@ -58,9 +66,14 @@ const Cart = () => {
         title: item.title
       }));
 
-      const { error: itemsError } = await orderItemsTable.insert(orderItems);
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems);
 
-      if (itemsError) throw itemsError;
+      if (itemsError) {
+        console.error("Order items creation error:", itemsError);
+        throw itemsError;
+      }
 
       console.log("Order items created");
 
