@@ -31,7 +31,27 @@ export interface OrderItem {
 }
 
 export interface Database {
-  profiles: Profile;
-  orders: Order;
-  order_items: OrderItem;
+  public: {
+    Tables: {
+      profiles: {
+        Row: Profile;
+        Insert: Partial<Profile>;
+        Update: Partial<Profile>;
+      };
+      orders: {
+        Row: Order;
+        Insert: Partial<Order>;
+        Update: Partial<Order>;
+      };
+      order_items: {
+        Row: OrderItem;
+        Insert: Partial<OrderItem>;
+        Update: Partial<OrderItem>;
+      };
+    };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
+  };
 }
