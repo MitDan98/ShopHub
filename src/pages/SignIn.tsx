@@ -1,9 +1,8 @@
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -18,35 +17,24 @@ const SignIn = () => {
   // Check if user is already logged in
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        console.log("User already logged in:", session.user.email);
-        
-        // Check if user is admin and redirect accordingly
-        if (session.user.email === "danmititi@gmail.com") {
-          console.log("Admin user detected, redirecting to admin dashboard");
-          navigate("/admin");
-        } else {
-          navigate("/");
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          console.log("User already logged in:", session.user.email);
+          
+          // Check if user is admin and redirect accordingly
+          if (session.user.email === "danmititi@gmail.com") {
+            console.log("Admin user detected, redirecting to admin dashboard");
+            navigate("/admin");
+          } else {
+            navigate("/");
+          }
         }
+      } catch (error) {
+        console.error("Error checking authentication status:", error);
       }
     };
     checkUser();
-
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed:", event, session ? "Session exists" : "No session");
-      if (session) {
-        if (session.user.email === "danmititi@gmail.com") {
-          console.log("Admin user detected, redirecting to admin dashboard");
-          navigate("/admin");
-        } else {
-          navigate("/");
-        }
-      }
-    });
-
-    return () => subscription.unsubscribe();
   }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -84,6 +72,7 @@ const SignIn = () => {
             description: error.message || "Please check your credentials and try again.",
           });
         }
+        setIsLoading(false);
         return;
       }
 
@@ -94,13 +83,13 @@ const SignIn = () => {
       });
       
       // Check if user is admin to redirect to admin dashboard
-      if (email === "danmititi@gmail.com") {
+      if (email.trim() === "danmititi@gmail.com") {
         console.log("Admin user detected, redirecting to admin dashboard");
         navigate("/admin");
       } else {
         navigate("/");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Unexpected error during sign in:", error);
       toast({
         variant: "destructive",

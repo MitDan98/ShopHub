@@ -10,15 +10,15 @@ import { LoadingState } from "@/components/admin/LoadingState";
 const AdminDashboard = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const { loading: authLoading, profile } = useAdminAuth();
+  const { loading: authLoading, profile, error: authError } = useAdminAuth();
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!authLoading && profile) {
+    if (!authLoading && profile && !authError) {
       console.log("Admin profile loaded:", profile);
       fetchAllOrders();
     }
-  }, [authLoading, profile]);
+  }, [authLoading, profile, authError]);
 
   const fetchAllOrders = async () => {
     try {
@@ -56,6 +56,17 @@ const AdminDashboard = () => {
         <Navbar />
         <div className="container mx-auto py-8">
           <LoadingState />
+        </div>
+      </div>
+    );
+  }
+
+  if (authError) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="container mx-auto py-8">
+          <LoadingState error={authError} />
         </div>
       </div>
     );

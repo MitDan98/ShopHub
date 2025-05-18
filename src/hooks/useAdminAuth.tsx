@@ -11,6 +11,7 @@ const ADMIN_EMAIL = "danmititi@gmail.com";
 export const useAdminAuth = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -19,39 +20,43 @@ export const useAdminAuth = () => {
     const checkAuth = async () => {
       setLoading(true);
       try {
+        console.log("Checking authentication for admin dashboard...");
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
           console.log("No session found, redirecting to signin");
-          navigate('/signin');
+          setError("You must be logged in to access the admin dashboard");
+          setTimeout(() => navigate('/signin'), 2000);
           return;
         }
         
         console.log("Current user email:", session.user.email);
-        console.log("Admin email check:", session.user.email === ADMIN_EMAIL);
         
         // Check if user email is the admin email
         if (session.user.email !== ADMIN_EMAIL) {
           console.log("User is not admin, redirecting to home");
+          setError("You are not authorized to access the admin dashboard");
           toast({
             variant: "destructive",
             title: "Access Denied",
             description: "You are not authorized to access the admin dashboard",
           });
-          navigate('/');
+          setTimeout(() => navigate('/'), 2000);
           return;
         }
         
         // Check if user has admin role or set it if needed
         await checkAndSetupAdminRole(session.user.id, session.user.email);
-      } catch (error) {
+        setError(null);
+      } catch (error: any) {
         console.error('Error in auth check:', error);
+        setError(error.message || "Authentication error");
         toast({
           variant: "destructive",
           title: "Authentication Error",
           description: "Please try signing in again",
         });
-        navigate('/signin');
+        setTimeout(() => navigate('/signin'), 2000);
       } finally {
         setLoading(false);
       }
@@ -61,16 +66,18 @@ export const useAdminAuth = () => {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
         navigate('/signin');
-      } else if (session.user.email !== ADMIN_EMAIL) {
+      } else if (session && session.user.email !== ADMIN_EMAIL) {
         toast({
           variant: "destructive",
           title: "Access Denied",
           description: "You are not authorized to access the admin dashboard",
         });
         navigate('/');
+      } else if (session && session.user.email === ADMIN_EMAIL) {
+        checkAndSetupAdminRole(session.user.id, session.user.email);
       }
     });
 
@@ -113,12 +120,14 @@ export const useAdminAuth = () => {
         }
       } else {
         console.error("No profile found for user:", userId);
+        throw new Error("No profile found. Please try signing out and in again.");
       }
     } catch (error: any) {
       console.error('Error checking admin role:', error);
+      setError(error.message || "Error checking admin permissions");
       throw error;
     }
   };
 
-  return { loading, profile };
+  return { loading, profile, error };
 };
