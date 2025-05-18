@@ -38,6 +38,11 @@ const Register = () => {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            username: username // Store username in user metadata
+          },
+        }
       });
 
       if (error) {
@@ -47,25 +52,8 @@ const Register = () => {
           title: "Registration failed",
           description: error.message,
         });
+        setIsLoading(false);
         return;
-      }
-
-      if (data.user) {
-        // Then update their profile with the username
-        const { error: profileError } = await profilesTable.update({
-          id: data.user.id,
-          username
-        });
-
-        if (profileError) {
-          console.error("Profile update error:", profileError);
-          toast({
-            variant: "destructive",
-            title: "Profile update failed",
-            description: "Your account was created but we couldn't set your username.",
-          });
-          return;
-        }
       }
 
       console.log("Registration successful:", data);
