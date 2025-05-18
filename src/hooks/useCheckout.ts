@@ -50,7 +50,8 @@ export const useCheckout = () => {
         throw new Error("Failed to create order - no data returned");
       }
       
-      // Explicitly type and access the first order
+      // Handle different response formats from Supabase
+      // It can return either an array or a single object
       const order = Array.isArray(orderData) && orderData.length > 0 
         ? orderData[0] as Order 
         : orderData as Order;
