@@ -1,10 +1,20 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { profilesTable } from "@/integrations/supabase/customClient";
+import { Profile } from "@/types/database.types";
+import { Session } from "@supabase/supabase-js";
 
-export const EditProfileForm = ({ profile, session, onSuccess, onCancel }) => {
+interface EditProfileFormProps {
+  profile: Partial<Profile> | null;
+  session: Session | null;
+  onSuccess: () => void;
+  onCancel: () => void;
+}
+
+export const EditProfileForm = ({ profile, session, onSuccess, onCancel }: EditProfileFormProps) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     full_name: profile?.full_name || "",
@@ -12,16 +22,20 @@ export const EditProfileForm = ({ profile, session, onSuccess, onCancel }) => {
   });
   const { toast } = useToast();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setLoading(true);
       console.log("Updating profile for user:", session?.user?.id);
 
-      const { error } = await supabase
-        .from('profiles')
-        .update(formData)
-        .eq('id', session?.user?.id);
+      if (!session?.user?.id) {
+        throw new Error("No user ID found");
+      }
+
+      const { error } = await profilesTable.update({
+        id: session.user.id,
+        ...formData
+      });
 
       if (error) throw error;
 
@@ -29,7 +43,7 @@ export const EditProfileForm = ({ profile, session, onSuccess, onCancel }) => {
         title: "Profile updated successfully",
       });
       onSuccess();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating profile:', error);
       toast({
         variant: "destructive",

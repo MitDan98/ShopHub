@@ -5,7 +5,9 @@ import { useCart } from "@/hooks/useCart";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { ordersTable, orderItemsTable } from "@/integrations/supabase/customClient";
 import { useNavigate } from "react-router-dom";
+import { Order } from "@/types/database.types";
 
 const Cart = () => {
   const { cartItems, updateQuantity, removeFromCart, clearCart } = useCart();
@@ -34,18 +36,16 @@ const Cart = () => {
       console.log("Creating order for user:", session.user.id);
 
       // Create order
-      const { data: order, error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          user_id: session.user.id,
-          total_amount: total,
-          status: "completed"
-        })
-        .select()
-        .single();
+      const { data: orderData, error: orderError } = await ordersTable.insert({
+        user_id: session.user.id,
+        total_amount: total,
+        status: "completed"
+      }).select().single();
 
       if (orderError) throw orderError;
+      if (!orderData) throw new Error("Failed to create order");
 
+      const order = orderData as Order;
       console.log("Order created:", order);
 
       // Create order items
@@ -57,9 +57,7 @@ const Cart = () => {
         title: item.title
       }));
 
-      const { error: itemsError } = await supabase
-        .from("order_items")
-        .insert(orderItems);
+      const { error: itemsError } = await orderItemsTable.insert(orderItems);
 
       if (itemsError) throw itemsError;
 
@@ -92,7 +90,7 @@ const Cart = () => {
         description: "You will receive a confirmation email shortly.",
       });
       navigate("/profile");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error processing order:", error);
       toast({
         variant: "destructive",

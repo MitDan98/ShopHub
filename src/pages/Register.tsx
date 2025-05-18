@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
@@ -5,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { supabase } from "@/integrations/supabase/client";
+import { profilesTable } from "@/integrations/supabase/customClient";
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -50,10 +52,10 @@ const Register = () => {
 
       if (data.user) {
         // Then update their profile with the username
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({ username })
-          .eq('id', data.user.id);
+        const { error: profileError } = await profilesTable.update({
+          id: data.user.id,
+          username
+        });
 
         if (profileError) {
           console.error("Profile update error:", profileError);
@@ -75,7 +77,7 @@ const Register = () => {
       });
       
       navigate("/signin");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Unexpected error during registration:", error);
       toast({
         variant: "destructive",

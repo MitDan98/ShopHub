@@ -1,13 +1,21 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { profilesTable } from "@/integrations/supabase/customClient";
 import { useNavigate } from "react-router-dom";
 import { EditProfileForm } from "./EditProfileForm";
 import { Home } from "lucide-react";
+import { Session } from "@supabase/supabase-js";
+import { Profile } from "@/types/database.types";
 
-export const UserProfile = ({ session }) => {
-  const [profile, setProfile] = useState(null);
+interface UserProfileProps {
+  session: Session | null;
+}
+
+export const UserProfile = ({ session }: UserProfileProps) => {
+  const [profile, setProfile] = useState<Partial<Profile> | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('profile');
   const [isEditing, setIsEditing] = useState(false);
@@ -17,18 +25,18 @@ export const UserProfile = ({ session }) => {
   const getProfile = async () => {
     try {
       setLoading(true);
-      console.log("Fetching profile for user:", session?.user?.id);
+      if (!session?.user?.id) {
+        throw new Error("No user ID found");
+      }
       
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session?.user?.id)
-        .single();
+      console.log("Fetching profile for user:", session.user.id);
+      
+      const { data, error } = await profilesTable.getById(session.user.id);
 
       if (error) throw error;
       console.log('Profile data:', data);
       setProfile(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching profile:', error);
       toast({
         variant: "destructive",
