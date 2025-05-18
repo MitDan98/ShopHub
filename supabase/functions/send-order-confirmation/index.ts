@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("resend");
@@ -43,21 +44,94 @@ const handler = async (req: Request): Promise<Response> => {
     const itemsList = emailRequest.orderDetails.items
       .map(
         (item) =>
-          `<li>${item.title} x ${item.quantity} - $${(
-            item.price * item.quantity
-          ).toFixed(2)}</li>`
+          `<tr>
+            <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${item.title}</td>
+            <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: center;">${item.quantity}</td>
+            <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: right;">$${item.price.toFixed(2)}</td>
+            <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: right;">$${(item.price * item.quantity).toFixed(2)}</td>
+          </tr>`
       )
       .join("");
 
     const html = `
-      <h1>Order Confirmation</h1>
-      <p>Thank you for your order! Here are your order details:</p>
-      <h2>Order #${emailRequest.orderDetails.id}</h2>
-      <ul>
-        ${itemsList}
-      </ul>
-      <p><strong>Total: $${emailRequest.orderDetails.total.toFixed(2)}</strong></p>
-      <p>Random confirmation number: ${Math.random().toString(36).substring(7)}</p>
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+          }
+          .header {
+            background-color: #f9fafb;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+          }
+          .content {
+            padding: 20px;
+          }
+          .footer {
+            background-color: #f9fafb;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #6b7280;
+            border-top: 1px solid #e2e8f0;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+          th {
+            background-color: #f3f4f6;
+            text-align: left;
+            padding: 12px;
+          }
+          .total-row {
+            font-weight: bold;
+            background-color: #f9fafb;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Order Confirmation</h1>
+          <p>Thank you for your order!</p>
+        </div>
+        <div class="content">
+          <h2>Order #${emailRequest.orderDetails.id}</h2>
+          <p>Your order has been confirmed and is being processed. Here are your order details:</p>
+          
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th style="text-align: center;">Quantity</th>
+                <th style="text-align: right;">Price</th>
+                <th style="text-align: right;">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsList}
+              <tr class="total-row">
+                <td colspan="3" style="padding: 12px; text-align: right;">Total:</td>
+                <td style="padding: 12px; text-align: right;">$${emailRequest.orderDetails.total.toFixed(2)}</td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <p>Order confirmation number: ${Math.random().toString(36).substring(7).toUpperCase()}</p>
+          <p>If you have any questions about your order, please contact our customer service.</p>
+        </div>
+        <div class="footer">
+          &copy; ${new Date().getFullYear()} Shop. All rights reserved.
+        </div>
+      </body>
+      </html>
     `;
 
     console.log("Sending email via Resend API");

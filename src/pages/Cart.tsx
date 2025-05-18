@@ -1,3 +1,4 @@
+
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Minus, Plus, Trash2 } from "lucide-react";
@@ -89,7 +90,7 @@ const Cart = () => {
         title: "Order placed successfully!",
         description: "You will receive a confirmation email shortly.",
       });
-      navigate("/profile");
+      navigate("/profile", { state: { activeTab: "orders" }, replace: true });
     } catch (error: any) {
       console.error("Error processing order:", error);
       toast({
