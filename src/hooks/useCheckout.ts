@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
 import { Order } from "@/types/database.types";
+import { ordersTable, orderItemsTable } from "@/integrations/supabase/customClient";
 
 export const useCheckout = () => {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
@@ -32,27 +33,26 @@ export const useCheckout = () => {
 
       console.log("Creating order for user:", session.user.id);
 
-      // Create order - the trigger will automatically set user_id
-      const { data: orderData, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          total_amount: total,
-          status: "completed"
-        })
-        .select()
-        .single();
+      // Create order using the ordersTable helper from customClient
+      const { data: orderData, error: orderError } = await ordersTable.insert({
+        total_amount: total,
+        status: "completed"
+        // user_id is set automatically by the trigger we created
+      });
 
       if (orderError) {
         console.error("Order creation error:", orderError);
         throw orderError;
       }
       
-      if (!orderData) throw new Error("Failed to create order");
+      if (!orderData || orderData.length === 0) {
+        throw new Error("Failed to create order");
+      }
 
-      const order = orderData as Order;
+      const order = orderData[0] as Order;
       console.log("Order created:", order);
 
-      // Create order items
+      // Create order items using the orderItemsTable helper
       const orderItems = cartItems.map(item => ({
         order_id: order.id,
         product_id: item.id,
@@ -61,9 +61,7 @@ export const useCheckout = () => {
         title: item.title
       }));
 
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems);
+      const { error: itemsError } = await orderItemsTable.insert(orderItems);
 
       if (itemsError) {
         console.error("Order items creation error:", itemsError);
@@ -104,7 +102,7 @@ export const useCheckout = () => {
       toast({
         variant: "destructive",
         title: "Error processing order",
-        description: "Please try again later",
+        description: error.message || "Please try again later",
       });
     } finally {
       setIsCheckingOut(false);
