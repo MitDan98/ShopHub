@@ -48,7 +48,7 @@ export const useCheckout = () => {
       console.log("Order data received:", orderData);
       
       // Check if orderData exists and has data
-      if (!orderData || (Array.isArray(orderData) && orderData.length === 0)) {
+      if (!orderData) {
         throw new Error("Failed to create order - no data returned");
       }
       
@@ -56,7 +56,10 @@ export const useCheckout = () => {
       let order: Order;
       
       if (Array.isArray(orderData)) {
-        order = orderData[0];
+        if (orderData.length === 0) {
+          throw new Error("Failed to create order - empty array returned");
+        }
+        order = orderData[0] as Order;
       } else {
         order = orderData as Order;
       }
