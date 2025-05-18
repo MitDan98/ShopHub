@@ -55,11 +55,14 @@ export const useCheckout = () => {
       // Handle different response formats from Supabase
       let order: Order;
       
+      // Fix the TypeScript error by using type assertion before checking length
       if (Array.isArray(orderData)) {
-        if (orderData.length === 0) {
+        // Explicitly assert that orderData is an array of something (not never)
+        const orderArray = orderData as any[];
+        if (orderArray.length === 0) {
           throw new Error("Failed to create order - empty array returned");
         }
-        order = orderData[0] as Order;
+        order = orderArray[0] as Order;
       } else {
         order = orderData as Order;
       }
