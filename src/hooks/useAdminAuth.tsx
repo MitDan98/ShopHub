@@ -100,6 +100,7 @@ export const useAdminAuth = () => {
         // If user is admin email but doesn't have admin role, update it
         if (email === ADMIN_EMAIL && data.role !== 'admin') {
           console.log("Setting admin role for user:", userId);
+          // Fixed: Added WHERE clause with user id in the update method
           const { error: updateError } = await profilesTable.update({
             id: userId,
             role: 'admin'

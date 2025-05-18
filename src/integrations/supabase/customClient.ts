@@ -9,7 +9,11 @@ export const profilesTable = {
   select: () => 
     supabase.from('profiles').select('*'),
   update: (profile: Partial<Profile>) => 
-    supabase.from('profiles').update(profile),
+    // Fixed: Added WHERE condition to ensure we update the correct profile
+    supabase.from('profiles').update({
+      // Exclude id from the update data
+      ...(({ id, ...rest }) => rest)(profile)
+    }).eq('id', profile.id),
   getById: (id: string) => 
     supabase.from('profiles').select('*').eq('id', id).single(),
   getAllAdmins: () => 

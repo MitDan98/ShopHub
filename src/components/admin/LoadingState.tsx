@@ -38,6 +38,9 @@ export const LoadingState = ({ message = "Loading dashboard...", error }: Loadin
           <div className="bg-red-100 text-red-700 p-4 rounded-md mb-4">
             <p className="font-semibold">Authentication Error</p>
             <p className="text-sm">{error}</p>
+            {error.includes("UPDATE requires a WHERE clause") && (
+              <p className="mt-2 text-sm">Database error: Please contact an administrator.</p>
+            )}
           </div>
           <a href="/signin" className="text-blue-600 hover:underline">
             Back to Sign In
