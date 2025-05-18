@@ -30,6 +30,15 @@ export interface OrderItem {
   created_at: string;
 }
 
+export interface OrderTracking {
+  id: string;
+  order_id: string;
+  status: string;
+  status_description?: string | null;
+  updated_by: string;
+  created_at: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -47,6 +56,11 @@ export interface Database {
         Row: OrderItem;
         Insert: Partial<OrderItem>;
         Update: Partial<OrderItem>;
+      };
+      order_tracking: {
+        Row: OrderTracking;
+        Insert: Partial<OrderTracking>;
+        Update: Partial<OrderTracking>;
       };
     };
     Views: Record<string, never>;

@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { profilesTable } from "@/integrations/supabase/customClient";
 import { useNavigate } from "react-router-dom";
 import { EditProfileForm } from "./EditProfileForm";
-import { Home } from "lucide-react";
+import { Home, Package, User, Settings } from "lucide-react";
 import { Session } from "@supabase/supabase-js";
 import { Profile } from "@/types/database.types";
 
@@ -96,23 +96,38 @@ export const UserProfile = ({ session }: UserProfileProps) => {
       {/* Tab Navigation */}
       <div className="flex gap-4 mb-6 border-b">
         <button
-          className={`pb-2 px-4 ${activeTab === 'profile' ? 'border-b-2 border-primary font-medium' : 'text-gray-500'}`}
+          className={`pb-2 px-4 flex items-center gap-1 ${activeTab === 'profile' ? 'border-b-2 border-primary font-medium' : 'text-gray-500'}`}
           onClick={() => setActiveTab('profile')}
         >
+          <User className="w-4 h-4" />
           Profile
         </button>
         <button
-          className={`pb-2 px-4 ${activeTab === 'orders' ? 'border-b-2 border-primary font-medium' : 'text-gray-500'}`}
-          onClick={() => setActiveTab('orders')}
+          className={`pb-2 px-4 flex items-center gap-1 ${activeTab === 'orders' ? 'border-b-2 border-primary font-medium' : 'text-gray-500'}`}
+          onClick={() => {
+            navigate('/orders');
+          }}
         >
+          <Package className="w-4 h-4" />
           Orders
         </button>
         <button
-          className={`pb-2 px-4 ${activeTab === 'settings' ? 'border-b-2 border-primary font-medium' : 'text-gray-500'}`}
+          className={`pb-2 px-4 flex items-center gap-1 ${activeTab === 'settings' ? 'border-b-2 border-primary font-medium' : 'text-gray-500'}`}
           onClick={() => setActiveTab('settings')}
         >
+          <Settings className="w-4 h-4" />
           Settings
         </button>
+        
+        {/* Admin Dashboard Link - only visible for admins */}
+        {profile?.role === 'admin' && (
+          <button
+            className="ml-auto pb-2 px-4 text-blue-600 hover:text-blue-800 font-medium"
+            onClick={() => navigate('/admin')}
+          >
+            Admin Dashboard
+          </button>
+        )}
       </div>
 
       {/* Profile Information */}
@@ -165,16 +180,19 @@ export const UserProfile = ({ session }: UserProfileProps) => {
                   {profile?.phone || 'Not set'}
                 </div>
               </div>
+
+              {profile?.role && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Account Type
+                  </label>
+                  <div className="text-gray-900 bg-gray-50 p-2 rounded capitalize">
+                    {profile.role}
+                  </div>
+                </div>
+              )}
             </div>
           )}
-        </div>
-      )}
-
-      {/* Orders Tab Content */}
-      {activeTab === 'orders' && (
-        <div className="bg-white rounded-lg p-6 shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">Orders</h2>
-          <p className="text-gray-500">No orders yet.</p>
         </div>
       )}
 

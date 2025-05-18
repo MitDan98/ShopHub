@@ -1,6 +1,6 @@
 
 import { supabase } from './client';
-import type { Profile, Order, OrderItem } from '@/types/database.types';
+import type { Profile, Order, OrderItem, OrderTracking } from '@/types/database.types';
 
 // Typed methods for profiles table
 export const profilesTable = {
@@ -11,7 +11,9 @@ export const profilesTable = {
   update: (profile: Partial<Profile>) => 
     supabase.from('profiles').update(profile),
   getById: (id: string) => 
-    supabase.from('profiles').select('*').eq('id', id).single()
+    supabase.from('profiles').select('*').eq('id', id).single(),
+  getAllAdmins: () => 
+    supabase.from('profiles').select('*').eq('role', 'admin')
 };
 
 // Typed methods for orders table
@@ -23,7 +25,11 @@ export const ordersTable = {
   getById: (id: string) => 
     supabase.from('orders').select('*').eq('id', id).single(),
   getByUserId: (userId: string) => 
-    supabase.from('orders').select('*').eq('user_id', userId)
+    supabase.from('orders').select('*').eq('user_id', userId),
+  update: (id: string, orderData: Partial<Order>) => 
+    supabase.from('orders').update(orderData).eq('id', id),
+  getAllOrders: () => 
+    supabase.from('orders').select('*, profiles(username, email)')
 };
 
 // Typed methods for order_items table
@@ -34,4 +40,17 @@ export const orderItemsTable = {
     supabase.from('order_items').select('*'),
   getByOrderId: (orderId: string) => 
     supabase.from('order_items').select('*').eq('order_id', orderId)
+};
+
+// Typed methods for order_tracking table
+export const orderTrackingTable = {
+  insert: (tracking: Partial<OrderTracking>) =>
+    supabase.from('order_tracking').insert(tracking),
+  getByOrderId: (orderId: string) =>
+    supabase.from('order_tracking')
+      .select('*')
+      .eq('order_id', orderId)
+      .order('created_at', { ascending: false }),
+  update: (id: string, trackingData: Partial<OrderTracking>) =>
+    supabase.from('order_tracking').update(trackingData).eq('id', id)
 };
