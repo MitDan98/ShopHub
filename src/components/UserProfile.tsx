@@ -14,6 +14,8 @@ interface UserProfileProps {
   session: Session | null;
 }
 
+const ADMIN_EMAIL = "danmititi@gmail.com";
+
 export const UserProfile = ({ session }: UserProfileProps) => {
   const [profile, setProfile] = useState<Partial<Profile> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,6 +55,9 @@ export const UserProfile = ({ session }: UserProfileProps) => {
       getProfile();
     }
   }, [session?.user?.id]);
+
+  // Check if current user is the admin
+  const isAdmin = session?.user?.email === ADMIN_EMAIL;
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -119,8 +124,8 @@ export const UserProfile = ({ session }: UserProfileProps) => {
           Settings
         </button>
         
-        {/* Admin Dashboard Link - only visible for admins */}
-        {profile?.role === 'admin' && (
+        {/* Admin Dashboard Link - only visible for specific admin email */}
+        {isAdmin && (
           <button
             className="ml-auto pb-2 px-4 text-blue-600 hover:text-blue-800 font-medium"
             onClick={() => navigate('/admin')}

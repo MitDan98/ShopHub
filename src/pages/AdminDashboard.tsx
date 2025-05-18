@@ -37,6 +37,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+const ADMIN_EMAIL = "danmititi@gmail.com";
+
 const AdminDashboard = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -56,8 +58,19 @@ const AdminDashboard = () => {
         return;
       }
       
-      // Check if user is admin
-      checkAdminRole(session.user.id);
+      // Check if user email is the admin email
+      if (session.user.email !== ADMIN_EMAIL) {
+        toast({
+          variant: "destructive",
+          title: "Access Denied",
+          description: "You are not authorized to access the admin dashboard",
+        });
+        navigate('/');
+        return;
+      }
+      
+      // Check if user has admin role or set it if needed
+      checkAndSetupAdminRole(session.user.id, session.user.email);
     });
 
     const {
@@ -65,27 +78,48 @@ const AdminDashboard = () => {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
         navigate('/signin');
+      } else if (session.user.email !== ADMIN_EMAIL) {
+        toast({
+          variant: "destructive",
+          title: "Access Denied",
+          description: "You are not authorized to access the admin dashboard",
+        });
+        navigate('/');
       }
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const checkAdminRole = async (userId: string) => {
+  const checkAndSetupAdminRole = async (userId: string, email: string) => {
     try {
       const { data, error } = await profilesTable.getById(userId);
       
       if (error) throw error;
       
       if (data) {
+        // If user is admin email but doesn't have admin role, update it
+        if (email === ADMIN_EMAIL && data.role !== 'admin') {
+          const { error: updateError } = await profilesTable.update({
+            id: userId,
+            role: 'admin'
+          });
+          
+          if (updateError) throw updateError;
+          
+          console.log("Admin role set successfully");
+        }
+        
         setProfile(data);
+        
+        // Only proceed with admin dashboard if user has admin role
         if (data.role === 'admin') {
           fetchAllOrders();
         } else {
           toast({
             variant: "destructive",
             title: "Access Denied",
-            description: "You don't have permission to access the admin dashboard",
+            description: "You don't have admin privileges",
           });
           navigate('/');
         }
