@@ -90,6 +90,7 @@ export type Database = {
           total_amount: number
           updated_at: string
           user_id: string
+          user_id_old: string | null
         }
         Insert: {
           created_at?: string
@@ -98,6 +99,7 @@ export type Database = {
           total_amount: number
           updated_at?: string
           user_id: string
+          user_id_old?: string | null
         }
         Update: {
           created_at?: string
@@ -106,8 +108,17 @@ export type Database = {
           total_amount?: number
           updated_at?: string
           user_id?: string
+          user_id_old?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
