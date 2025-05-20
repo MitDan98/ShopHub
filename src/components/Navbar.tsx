@@ -1,3 +1,4 @@
+
 import { ShoppingCart, Search, Menu, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,18 +43,10 @@ export const Navbar = () => {
 
   const handleCategoryClick = () => {
     navigate("/products");
-    toast({
-      title: "Categories",
-      description: "Viewing all categories",
-    });
   };
 
   const handleDealsClick = () => {
-    navigate("/products");
-    toast({
-      title: "Deals",
-      description: "Viewing current deals",
-    });
+    navigate("/deals");
   };
 
   const handleCartClick = () => {

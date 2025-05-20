@@ -47,6 +47,9 @@ export const NavbarWithLanguage = () => {
           <Link to="/products" className="text-gray-600 hover:text-primary">
             {t('products')}
           </Link>
+          <Link to="/deals" className="text-gray-600 hover:text-primary">
+            {t('deals')}
+          </Link>
           <AuthLinks 
             email={email} 
             isResettingPassword={isResettingPassword} 
@@ -101,6 +104,13 @@ export const NavbarWithLanguage = () => {
               onClick={() => setIsMobileMenuOpen(false)}
             >
               {t('products')}
+            </Link>
+            <Link
+              to="/deals"
+              className="py-2 text-gray-600"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              {t('deals')}
             </Link>
             <div className="py-2">
               <AuthLinks 
