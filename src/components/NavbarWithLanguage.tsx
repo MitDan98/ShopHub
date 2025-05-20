@@ -19,6 +19,17 @@ export const NavbarWithLanguage = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  // Add these lines for AuthLinks props
+  const [email, setEmail] = useState("");
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  
+  const handleResetPassword = () => {
+    setIsResettingPassword(true);
+    console.log("Reset password requested");
+    // Reset the state after a delay to simulate an API call
+    setTimeout(() => setIsResettingPassword(false), 1500);
+  };
+
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
@@ -36,7 +47,11 @@ export const NavbarWithLanguage = () => {
           <Link to="/products" className="text-gray-600 hover:text-primary">
             {t('products')}
           </Link>
-          <AuthLinks />
+          <AuthLinks 
+            email={email} 
+            isResettingPassword={isResettingPassword} 
+            onResetPassword={handleResetPassword} 
+          />
           <Link to="/cart" className="relative">
             <ShoppingBag className="h-6 w-6 text-gray-600 hover:text-primary" />
             {totalItems > 0 && (
@@ -88,7 +103,11 @@ export const NavbarWithLanguage = () => {
               {t('products')}
             </Link>
             <div className="py-2">
-              <AuthLinks />
+              <AuthLinks 
+                email={email} 
+                isResettingPassword={isResettingPassword} 
+                onResetPassword={handleResetPassword} 
+              />
             </div>
           </div>
         </div>
