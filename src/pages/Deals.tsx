@@ -1,11 +1,11 @@
 
 import { FeaturedProducts } from "@/components/FeaturedProducts";
-import { NavbarWithLanguage } from "@/components/NavbarWithLanguage";
+import { Navbar } from "@/components/Navbar";
 
 const Deals = () => {
   return (
     <div className="min-h-screen bg-gray-50">
-      <NavbarWithLanguage />
+      <Navbar />
       <main className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-8">Deals</h1>
         <div className="mb-8">
