@@ -4,15 +4,15 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 interface AuthLinksProps {
-  email: string;
-  isResettingPassword: boolean;
-  onResetPassword: () => void;
+  email?: string; // Make email optional
+  isResettingPassword?: boolean; // Make isResettingPassword optional
+  onResetPassword?: () => void; // Make onResetPassword optional
 }
 
 export const AuthLinks = ({ 
-  email, 
-  isResettingPassword, 
-  onResetPassword 
+  email = "", 
+  isResettingPassword = false, 
+  onResetPassword = () => console.log("Reset password action") 
 }: AuthLinksProps) => {
   const navigate = useNavigate();
   
