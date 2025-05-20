@@ -5,13 +5,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
 import { Order } from "@/types/database.types";
-import { ordersTable, orderItemsTable } from "@/integrations/supabase/customClient";
+import { orderItemsTable } from "@/integrations/supabase/customClient";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export const useCheckout = () => {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const { cartItems, clearCart } = useCart();
+  const { t } = useLanguage();
 
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -24,8 +26,8 @@ export const useCheckout = () => {
       if (!session) {
         toast({
           variant: "destructive",
-          title: "Please sign in",
-          description: "You need to be signed in to complete your order",
+          title: t('pleaseSignIn'),
+          description: t('signInRequired'),
         });
         navigate("/signin");
         return;
@@ -102,14 +104,14 @@ export const useCheckout = () => {
         console.error("Error sending email:", emailError);
         // Don't throw error here, as the order was still successful
         toast({
-          title: "Order placed successfully!",
+          title: t('orderSuccess'),
           description: "Your order has been placed, but there was an issue sending the confirmation email.",
         });
       } else {
         console.log("Order confirmation email sent successfully");
         toast({
-          title: "Order placed successfully!",
-          description: "You will receive a confirmation email shortly.",
+          title: t('orderSuccess'),
+          description: t('emailConfirmation'),
         });
       }
 
@@ -122,8 +124,8 @@ export const useCheckout = () => {
       console.error("Error processing order:", error);
       toast({
         variant: "destructive",
-        title: "Error processing order",
-        description: error.message || "Please try again later",
+        title: t('orderError'),
+        description: error.message || t('tryAgain'),
       });
     } finally {
       setIsCheckingOut(false);
