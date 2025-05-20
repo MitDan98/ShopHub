@@ -32,44 +32,38 @@ export const useCheckout = () => {
       }
 
       console.log("Creating order for user:", session.user.id);
-
-      // Create order using the ordersTable helper from customClient
-      const { data: orderData, error: orderError } = await ordersTable.insert({
+      
+      // Create a new order object with explicit user_id
+      const newOrder = {
         total_amount: total,
         status: "completed",
-        user_id: session.user.id // Explicitly set user_id to ensure it's properly assigned
-      });
+        user_id: session.user.id
+      };
+      
+      // Insert the order directly using supabase client for more control
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert(newOrder)
+        .select()
+        .single();
 
       if (orderError) {
         console.error("Order creation error:", orderError);
         throw orderError;
       }
       
-      console.log("Order data received:", orderData);
+      console.log("Order created successfully:", orderData);
       
-      // Check if orderData exists and has data
       if (!orderData) {
         throw new Error("Failed to create order - no data returned");
       }
       
-      // Handle different response formats from Supabase
-      let order: Order;
-      
-      // Fix the TypeScript error by using type assertion before checking length
-      if (Array.isArray(orderData)) {
-        // Explicitly assert that orderData is an array of something (not never)
-        const orderArray = orderData as any[];
-        if (orderArray.length === 0) {
-          throw new Error("Failed to create order - empty array returned");
-        }
-        order = orderArray[0] as Order;
-      } else {
-        order = orderData as Order;
-      }
+      // We have the order object directly from the single() call
+      const order = orderData;
         
       console.log("Order created:", order);
 
-      // Create order items using the orderItemsTable helper
+      // Create order items
       const orderItems = cartItems.map(item => ({
         order_id: order.id,
         product_id: item.id,
@@ -119,7 +113,10 @@ export const useCheckout = () => {
         });
       }
 
+      // Clear cart after successful order
       clearCart();
+      
+      // Navigate to the profile page with orders tab active
       navigate("/profile", { state: { activeTab: "orders" }, replace: true });
     } catch (error: any) {
       console.error("Error processing order:", error);
