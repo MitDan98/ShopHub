@@ -15,6 +15,15 @@ export const NavbarWithLanguage = () => {
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
+  // Add state and handlers for AuthLinks component
+  const [email, setEmail] = useState("");
+  const isResettingPassword = false;
+  
+  const handleResetPassword = () => {
+    console.log("Password reset functionality would go here");
+    // This is just a placeholder function since we're not implementing actual reset functionality here
+  };
+
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -36,7 +45,11 @@ export const NavbarWithLanguage = () => {
           <Link to="/products" className="text-gray-600 hover:text-primary">
             {t('products')}
           </Link>
-          <AuthLinks />
+          <AuthLinks 
+            email={email}
+            isResettingPassword={isResettingPassword}
+            onResetPassword={handleResetPassword}
+          />
           <Link to="/cart" className="relative">
             <ShoppingBag className="h-6 w-6 text-gray-600 hover:text-primary" />
             {totalItems > 0 && (
@@ -88,7 +101,11 @@ export const NavbarWithLanguage = () => {
               {t('products')}
             </Link>
             <div className="py-2">
-              <AuthLinks />
+              <AuthLinks 
+                email={email}
+                isResettingPassword={isResettingPassword}
+                onResetPassword={handleResetPassword}
+              />
             </div>
           </div>
         </div>
