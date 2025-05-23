@@ -1,6 +1,7 @@
 
 import { EmptyState } from './EmptyState';
 import { OrdersTable } from './OrdersTable';
+import { ItemsManagement } from './ItemsManagement';
 import { 
   Tabs, 
   TabsContent, 
@@ -18,6 +19,7 @@ export const AdminTabs = ({ orders, onOrdersUpdate }: AdminTabsProps) => {
     <Tabs defaultValue="orders">
       <TabsList className="mb-4">
         <TabsTrigger value="orders">Orders</TabsTrigger>
+        <TabsTrigger value="items">Items</TabsTrigger>
         <TabsTrigger value="customers">Customers</TabsTrigger>
         <TabsTrigger value="analytics">Analytics</TabsTrigger>
       </TabsList>
@@ -30,6 +32,10 @@ export const AdminTabs = ({ orders, onOrdersUpdate }: AdminTabsProps) => {
         ) : (
           <OrdersTable orders={orders} onOrdersUpdate={onOrdersUpdate} />
         )}
+      </TabsContent>
+
+      <TabsContent value="items" className="bg-white rounded-lg shadow p-4">
+        <ItemsManagement />
       </TabsContent>
       
       <TabsContent value="customers" className="bg-white rounded-lg shadow p-4">
