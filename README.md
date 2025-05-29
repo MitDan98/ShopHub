@@ -59,6 +59,9 @@ This project is built with the following technologies and versions:
 - **@supabase/auth-ui-react** ^0.4.7 - Pre-built auth components
 - **@supabase/auth-ui-shared** ^0.1.8 - Shared utilities for auth UI
 
+### Email Services
+- **Resend** - Email delivery service for order confirmations and notifications
+
 ### State Management & Data Fetching
 - **@tanstack/react-query** ^5.56.2 - Powerful data synchronization for React
 
