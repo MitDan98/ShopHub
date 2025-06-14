@@ -20,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ImageUpload } from "./ImageUpload";
 
 interface Item {
   id: number;
@@ -193,15 +194,11 @@ export const ItemsManagement = () => {
                   placeholder="Electronics, Home, etc."
                 />
               </div>
-              <div>
-                <Label htmlFor="image">Image URL</Label>
-                <Input
-                  id="image"
-                  value={formData.image}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                  placeholder="/placeholder.svg"
-                />
-              </div>
+              <ImageUpload
+                value={formData.image}
+                onChange={(url) => setFormData({ ...formData, image: url })}
+                onRemove={() => setFormData({ ...formData, image: "" })}
+              />
               <Button onClick={handleAddItem} className="w-full">
                 Add Item
               </Button>
@@ -214,6 +211,7 @@ export const ItemsManagement = () => {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Image</TableHead>
               <TableHead>Title</TableHead>
               <TableHead>Price</TableHead>
               <TableHead>Category</TableHead>
@@ -223,6 +221,13 @@ export const ItemsManagement = () => {
           <TableBody>
             {items.map((item) => (
               <TableRow key={item.id}>
+                <TableCell>
+                  <img 
+                    src={item.image} 
+                    alt={item.title}
+                    className="w-12 h-12 object-cover rounded-md"
+                  />
+                </TableCell>
                 <TableCell className="font-medium">{item.title}</TableCell>
                 <TableCell>${item.price.toFixed(2)}</TableCell>
                 <TableCell>{item.category}</TableCell>
@@ -272,15 +277,11 @@ export const ItemsManagement = () => {
                               placeholder="Electronics, Home, etc."
                             />
                           </div>
-                          <div>
-                            <Label htmlFor="edit-image">Image URL</Label>
-                            <Input
-                              id="edit-image"
-                              value={formData.image}
-                              onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                              placeholder="/placeholder.svg"
-                            />
-                          </div>
+                          <ImageUpload
+                            value={formData.image}
+                            onChange={(url) => setFormData({ ...formData, image: url })}
+                            onRemove={() => setFormData({ ...formData, image: "" })}
+                          />
                           <Button onClick={handleEditItem} className="w-full">
                             Update Item
                           </Button>
