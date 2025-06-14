@@ -2,6 +2,15 @@
 import { ProductCard } from "./ProductCard";
 import { useToast } from "@/components/ui/use-toast";
 import { useCart } from "@/hooks/useCart";
+import { useState, useEffect } from "react";
+
+interface Item {
+  id: number;
+  title: string;
+  price: number;
+  image: string;
+  category: string;
+}
 
 const FEATURED_PRODUCTS = [
   {
@@ -63,11 +72,28 @@ const FEATURED_PRODUCTS = [
 ];
 
 export const FeaturedProducts = () => {
+  const [allProducts, setAllProducts] = useState<Item[]>(FEATURED_PRODUCTS);
   const { toast } = useToast();
   const { addToCart } = useCart();
 
+  useEffect(() => {
+    // Load admin items from localStorage and combine with featured products
+    const savedItems = localStorage.getItem('admin_items');
+    if (savedItems) {
+      const adminItems = JSON.parse(savedItems);
+      // Combine featured products with admin items, ensuring no duplicates by ID
+      const combined = [...FEATURED_PRODUCTS];
+      adminItems.forEach((adminItem: Item) => {
+        if (!combined.find(item => item.id === adminItem.id)) {
+          combined.push(adminItem);
+        }
+      });
+      setAllProducts(combined);
+    }
+  }, []);
+
   const handleAddToCart = (productId: number) => {
-    const product = FEATURED_PRODUCTS.find(p => p.id === productId);
+    const product = allProducts.find(p => p.id === productId);
     if (product) {
       addToCart({
         id: product.id,
@@ -89,7 +115,7 @@ export const FeaturedProducts = () => {
       <div className="container">
         <h2 className="text-3xl font-bold mb-8">Featured Products</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {FEATURED_PRODUCTS.map((product) => (
+          {allProducts.map((product) => (
             <ProductCard 
               key={product.id} 
               {...product} 
